@@ -368,13 +368,27 @@
 <details id="rules-section">
   <summary>Rules</summary>
   <div class="rules-body">
-    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.</p>
+    <p>For this world cup game, everyone will have to pick 12 teams. The world cup divides teams up into 12 groups, and 4 pots. The groups are the groups that your teams will be playing against in the group stage. The pots are to separate teams by their skill, teams in pot 1 are generally better and teams in pot 4 are generally worse. Each team is only in 1 group and 1 pot. What pot a team is in is next to the team name. You will be picking one team in each group, and 3 from each pot.</p>
+
+    <p>You will get points based on how each team does in each game they play. The further your teams go in the World Cup, i.e. the more games they play, the more opportunities to score points you will have. The scoring is in two sections:</p>
+
+    <p><strong>In group play, teams get you:</strong></p>
     <ul>
-      <li>Filler rule number one goes here — replace with your actual rule.</li>
-      <li>Filler rule number two goes here — replace with your actual rule.</li>
-      <li>Filler rule number three goes here — replace with your actual rule.</li>
-      <li>Filler rule number four goes here — replace with your actual rule.</li>
+      <li>3 points for a win</li>
+      <li>2 points for a draw against an opponent from a better pot than them</li>
+      <li>1 point for a draw against an opponent from a better pot than them</li>
+      <li>0 points for a loss</li>
     </ul>
+
+    <p><strong>In the knockout stage, teams get you:</strong></p>
+    <ul>
+      <li>3 points for a win</li>
+      <li>2 points for win in a penalty shootout</li>
+      <li>1 point for win in a penalty shootout</li>
+      <li>0 points for a loss</li>
+    </ul>
+
+    <p>Make your selections and then hit submit, and I will have them saved! Please have all submissions in by June 10th, at 11pm Central.</p>
   </div>
 </details>
 
@@ -385,9 +399,9 @@
 <div id="submit-section">
   <h3>Submit Your Picks</h3>
   <label for="input-name">Your Name *</label>
-  <input type="text" id="input-name" placeholder="e.g. John Smith" required />
+  <input type="text" id="input-name" placeholder="e.g. Santa Claus" required />
   <label for="input-email">Email *</label>
-  <input type="email" id="input-email" placeholder="e.g. john@example.com" required />
+  <input type="email" id="input-email" placeholder="e.g. Santa@northpole.org" required />
   <div id="validation-msg"></div>
   <button id="submit-btn" disabled>Make all 12 picks to submit</button>
   <div id="success-msg">🎉 Your picks have been submitted! Good luck!</div>
@@ -594,7 +608,7 @@
         btn.id = `btn-${gi}-${ti}`;
         btn.className = 'team-btn';
         btn.innerHTML = `
-          <span class="pot-badge pot-${team.pot}">P${team.pot}</span>
+          <span class="pot-badge pot-${team.pot}">Pot ${team.pot}</span>
           <span>${team.name}</span>
           <span class="check">✓</span>
         `;
