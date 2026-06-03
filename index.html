@@ -637,15 +637,20 @@
     });
 
     // Submit to Netlify Forms
-    const formData = new FormData();
-    formData.append('form-name', 'worldcup-picks');
-    formData.append('name', name);
-    formData.append('email', email);
-    formData.append('picks', picks.join(' | '));
-    formData.append('bot-field', '');
+    const body = new URLSearchParams({
+      'form-name': 'worldcup-picks',
+      name,
+      email,
+      picks: picks.join(' | '),
+      'bot-field': '',
+    }).toString();
 
     try {
-      const res = await fetch('/', { method: 'POST', body: formData });
+      const res = await fetch('/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body,
+      });
       if (res.ok) {
         document.getElementById('submit-btn').style.display = 'none';
         document.getElementById('success-msg').style.display = 'block';
