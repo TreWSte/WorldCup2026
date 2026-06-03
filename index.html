@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>World Cup 2026 Pick'em</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #0a1628;
+      color: #e8eaf0;
+      min-height: 100vh;
+      padding: 24px 16px 60px;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+
+    header h1 {
+      font-size: 2rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, #f5c518, #ff6b35);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    header p {
+      color: #8892a4;
+      margin-top: 6px;
+      font-size: 0.95rem;
+    }
+
+    /* Sticky progress bar */
+    #progress-bar {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: #111d35;
+      border-bottom: 1px solid #1e2d4a;
+      padding: 12px 20px;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    #progress-bar .label {
+      font-weight: 700;
+      font-size: 1rem;
+      color: #f5c518;
+      white-space: nowrap;
+    }
+
+    .pot-trackers {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .pot-chip {
+      background: #1a2540;
+      border: 1px solid #2a3a5c;
+      border-radius: 10px;
+      padding: 6px 12px;
+      font-size: 0.8rem;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      min-width: 100px;
+    }
+
+    .pot-chip-header {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .pot-chip .pot-count {
+      font-weight: 700;
+      color: #f5c518;
+    }
+
+    .pot-chip.at-limit {
+      border-color: #ff4444;
+      background: #2a1010;
+    }
+
+    .pot-chip.at-limit .pot-count {
+      color: #ff6666;
+    }
+
+    .pot-team-list {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .pot-team-name {
+      font-size: 0.72rem;
+      color: #a0b8d8;
+      padding-left: 2px;
+    }
+
+    /* Rules section */
+    #rules-section {
+      max-width: 1100px;
+      margin: 24px auto 0;
+      background: #111d35;
+      border: 1px solid #1e2d4a;
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    #rules-section summary {
+      padding: 14px 20px;
+      font-weight: 700;
+      font-size: 1rem;
+      color: #f5c518;
+      cursor: pointer;
+      user-select: none;
+      list-style: none;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    #rules-section summary::before {
+      content: '▶';
+      font-size: 0.65rem;
+      transition: transform 0.2s;
+      color: #8892a4;
+    }
+
+    #rules-section[open] summary::before {
+      transform: rotate(90deg);
+    }
+
+    #rules-section summary::-webkit-details-marker { display: none; }
+
+    .rules-body {
+      padding: 0 20px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      color: #a0b0cc;
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+
+    .rules-body ul {
+      padding-left: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    /* Groups grid */
+    .groups-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 16px;
+      max-width: 1100px;
+      margin: 24px auto;
+    }
+
+    .group-card {
+      background: #111d35;
+      border: 1px solid #1e2d4a;
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    .group-card h2 {
+      background: #1a2d50;
+      padding: 10px 16px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #a0b0cc;
+    }
+
+    .team-list {
+      padding: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .team-btn {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      border: 1px solid #1e2d4a;
+      border-radius: 8px;
+      background: #0d1829;
+      color: #c8d4e8;
+      cursor: pointer;
+      font-size: 0.9rem;
+      text-align: left;
+      transition: all 0.15s;
+      width: 100%;
+    }
+
+    .team-btn:hover:not(:disabled) {
+      background: #1a2d50;
+      border-color: #3a5080;
+    }
+
+    .team-btn.selected {
+      background: #0d3060;
+      border-color: #f5c518;
+      color: #fff;
+    }
+
+    .team-btn.selected .check {
+      display: flex;
+    }
+
+    .team-btn:disabled:not(.selected) {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    .check {
+      display: none;
+      align-items: center;
+      justify-content: center;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: #f5c518;
+      color: #000;
+      font-size: 0.65rem;
+      font-weight: 900;
+      flex-shrink: 0;
+      margin-left: auto;
+    }
+
+    .pot-badge {
+      font-size: 0.65rem;
+      padding: 2px 6px;
+      border-radius: 10px;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    .pot-1 { background: #7c3aed22; color: #a78bfa; border: 1px solid #7c3aed44; }
+    .pot-2 { background: #059669220; color: #34d399; border: 1px solid #05966944; }
+    .pot-3 { background: #d9770622; color: #fb923c; border: 1px solid #d9770644; }
+    .pot-4 { background: #dc262622; color: #f87171; border: 1px solid #dc262644; }
+
+    /* Submission form */
+    #submit-section {
+      max-width: 480px;
+      margin: 32px auto 0;
+      background: #111d35;
+      border: 1px solid #1e2d4a;
+      border-radius: 16px;
+      padding: 24px;
+    }
+
+    #submit-section h3 {
+      font-size: 1.1rem;
+      margin-bottom: 16px;
+      color: #f5c518;
+    }
+
+    #submit-section label {
+      display: block;
+      font-size: 0.85rem;
+      color: #8892a4;
+      margin-bottom: 4px;
+    }
+
+    #submit-section input[type="text"],
+    #submit-section input[type="email"] {
+      width: 100%;
+      padding: 10px 12px;
+      background: #0d1829;
+      border: 1px solid #2a3a5c;
+      border-radius: 8px;
+      color: #e8eaf0;
+      font-size: 0.95rem;
+      margin-bottom: 14px;
+    }
+
+    #submit-section input:focus {
+      outline: none;
+      border-color: #f5c518;
+    }
+
+    #validation-msg {
+      font-size: 0.85rem;
+      color: #ff6666;
+      margin-bottom: 12px;
+      min-height: 20px;
+    }
+
+    #submit-btn {
+      width: 100%;
+      padding: 12px;
+      background: linear-gradient(135deg, #f5c518, #ff6b35);
+      border: none;
+      border-radius: 8px;
+      color: #000;
+      font-weight: 800;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: opacity 0.15s;
+    }
+
+    #submit-btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    #submit-btn:hover:not(:disabled) {
+      opacity: 0.9;
+    }
+
+    #success-msg {
+      display: none;
+      text-align: center;
+      padding: 20px;
+      color: #34d399;
+      font-weight: 700;
+      font-size: 1rem;
+    }
+
+    .picks-summary {
+      margin-top: 16px;
+      font-size: 0.8rem;
+      color: #8892a4;
+    }
+
+    .picks-summary span {
+      display: inline-block;
+      background: #1a2d50;
+      border: 1px solid #2a3a5c;
+      border-radius: 6px;
+      padding: 2px 8px;
+      margin: 2px;
+      color: #c8d4e8;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>⚽ World Cup 2026 Pick'em</h1>
+  <p>Select 1 team from each group • Max 3 teams per pot</p>
+</header>
+
+<!-- Sticky progress tracker -->
+<div id="progress-bar">
+  <div class="label" id="pick-count">0 / 12 picks</div>
+  <div class="pot-trackers" id="pot-trackers"></div>
+</div>
+
+<!-- Rules -->
+<details id="rules-section">
+  <summary>Rules</summary>
+  <div class="rules-body">
+    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.</p>
+    <ul>
+      <li>Filler rule number one goes here — replace with your actual rule.</li>
+      <li>Filler rule number two goes here — replace with your actual rule.</li>
+      <li>Filler rule number three goes here — replace with your actual rule.</li>
+      <li>Filler rule number four goes here — replace with your actual rule.</li>
+    </ul>
+  </div>
+</details>
+
+<!-- Groups -->
+<div class="groups-grid" id="groups-grid"></div>
+
+<!-- Submit section -->
+<div id="submit-section">
+  <h3>Submit Your Picks</h3>
+  <label for="input-name">Your Name *</label>
+  <input type="text" id="input-name" placeholder="e.g. John Smith" required />
+  <label for="input-email">Email *</label>
+  <input type="email" id="input-email" placeholder="e.g. john@example.com" required />
+  <div id="validation-msg"></div>
+  <button id="submit-btn" disabled>Make all 12 picks to submit</button>
+  <div id="success-msg">🎉 Your picks have been submitted! Good luck!</div>
+  <div class="picks-summary" id="picks-summary"></div>
+</div>
+
+<!-- Hidden Netlify form (required for Netlify Forms to detect at deploy time) -->
+<form name="worldcup-picks" netlify netlify-honeypot="bot-field" hidden>
+  <input name="name" />
+  <input name="email" />
+  <input name="picks" />
+  <input name="bot-field" />
+</form>
+
+<script>
+  // ─── DATA ────────────────────────────────────────────────────────────────────
+  // Pot assignment: 1=Pot1, 2=Pot2, 3=Pot3, 4=Pot4
+  const GROUPS = [
+    { name: "Group A", teams: [
+      { name: "Mexico",       pot: 1 },
+      { name: "South Korea",  pot: 2 },
+      { name: "South Africa", pot: 3 },
+      { name: "Czechia",      pot: 4 },
+    ]},
+    { name: "Group B", teams: [
+      { name: "Canada",           pot: 1 },
+      { name: "Switzerland",      pot: 2 },
+      { name: "Qatar",            pot: 3 },
+      { name: "Bosnia-Herz.",     pot: 4 },
+    ]},
+    { name: "Group C", teams: [
+      { name: "Brazil",   pot: 1 },
+      { name: "Morocco",  pot: 2 },
+      { name: "Scotland", pot: 3 },
+      { name: "Haiti",    pot: 4 },
+    ]},
+    { name: "Group D", teams: [
+      { name: "USA",       pot: 1 },
+      { name: "Australia", pot: 2 },
+      { name: "Paraguay",  pot: 3 },
+      { name: "Türkiye",   pot: 4 },
+    ]},
+    { name: "Group E", teams: [
+      { name: "Germany",      pot: 1 },
+      { name: "Ecuador",      pot: 2 },
+      { name: "Ivory Coast",  pot: 3 },
+      { name: "Curaçao",      pot: 4 },
+    ]},
+    { name: "Group F", teams: [
+      { name: "Netherlands", pot: 1 },
+      { name: "Japan",       pot: 2 },
+      { name: "Tunisia",     pot: 3 },
+      { name: "Sweden",      pot: 4 },
+    ]},
+    { name: "Group G", teams: [
+      { name: "Belgium",     pot: 1 },
+      { name: "Iran",        pot: 2 },
+      { name: "Egypt",       pot: 3 },
+      { name: "New Zealand", pot: 4 },
+    ]},
+    { name: "Group H", teams: [
+      { name: "Spain",        pot: 1 },
+      { name: "Uruguay",      pot: 2 },
+      { name: "Saudi Arabia", pot: 3 },
+      { name: "Cabo Verde",   pot: 4 },
+    ]},
+    { name: "Group I", teams: [
+      { name: "France",  pot: 1 },
+      { name: "Senegal", pot: 2 },
+      { name: "Norway",  pot: 3 },
+      { name: "Iraq",    pot: 4 },
+    ]},
+    { name: "Group J", teams: [
+      { name: "Argentina", pot: 1 },
+      { name: "Austria",   pot: 2 },
+      { name: "Algeria",   pot: 3 },
+      { name: "Jordan",    pot: 4 },
+    ]},
+    { name: "Group K", teams: [
+      { name: "Portugal",  pot: 1 },
+      { name: "Colombia",  pot: 2 },
+      { name: "Uzbekistan",pot: 3 },
+      { name: "Congo DR",  pot: 4 },
+    ]},
+    { name: "Group L", teams: [
+      { name: "England", pot: 1 },
+      { name: "Croatia", pot: 2 },
+      { name: "Panama",  pot: 3 },
+      { name: "Ghana",   pot: 4 },
+    ]},
+  ];
+
+  const POT_LIMIT = 3;
+  const TOTAL_PICKS = 12;
+
+  // ─── STATE ───────────────────────────────────────────────────────────────────
+  // selections[groupIndex] = teamIndex or null
+  const selections = new Array(GROUPS.length).fill(null);
+
+  // ─── BUILD UI ────────────────────────────────────────────────────────────────
+  function getPotCounts() {
+    const counts = { 1: 0, 2: 0, 3: 0, 4: 0 };
+    selections.forEach((teamIdx, groupIdx) => {
+      if (teamIdx !== null) counts[GROUPS[groupIdx].teams[teamIdx].pot]++;
+    });
+    return counts;
+  }
+
+  function getTotalPicks() {
+    return selections.filter(s => s !== null).length;
+  }
+
+  function renderPotTrackers() {
+    const counts = getPotCounts();
+    const container = document.getElementById('pot-trackers');
+    container.innerHTML = '';
+
+    // Build a map of pot -> selected team names
+    const potTeams = { 1: [], 2: [], 3: [], 4: [] };
+    selections.forEach((teamIdx, groupIdx) => {
+      if (teamIdx !== null) {
+        const team = GROUPS[groupIdx].teams[teamIdx];
+        potTeams[team.pot].push(team.name);
+      }
+    });
+
+    for (let p = 1; p <= 4; p++) {
+      const chip = document.createElement('div');
+      chip.className = 'pot-chip' + (counts[p] >= POT_LIMIT ? ' at-limit' : '');
+
+      const teamListHtml = potTeams[p].length
+        ? `<div class="pot-team-list">${potTeams[p].map(n => `<div class="pot-team-name">· ${n}</div>`).join('')}</div>`
+        : '';
+
+      chip.innerHTML = `
+        <div class="pot-chip-header">Pot ${p}: <span class="pot-count">${counts[p]}/${POT_LIMIT}</span></div>
+        ${teamListHtml}
+      `;
+      container.appendChild(chip);
+    }
+  }
+
+  function renderPickCount() {
+    const total = getTotalPicks();
+    document.getElementById('pick-count').textContent = `${total} / ${TOTAL_PICKS} picks`;
+  }
+
+  function updateSubmitButton() {
+    const total = getTotalPicks();
+    const btn = document.getElementById('submit-btn');
+    const msg = document.getElementById('validation-msg');
+    if (total < TOTAL_PICKS) {
+      btn.disabled = true;
+      btn.textContent = `Make all 12 picks to submit`;
+      msg.textContent = '';
+    } else {
+      btn.disabled = false;
+      btn.textContent = 'Submit My Picks';
+      msg.textContent = '';
+    }
+
+    // Show picks summary
+    const summary = document.getElementById('picks-summary');
+    if (total > 0) {
+      const picked = [];
+      selections.forEach((teamIdx, groupIdx) => {
+        if (teamIdx !== null) picked.push(GROUPS[groupIdx].teams[teamIdx].name);
+      });
+      summary.innerHTML = 'Your picks: ' + picked.map(t => `<span>${t}</span>`).join('');
+    } else {
+      summary.innerHTML = '';
+    }
+  }
+
+  function updateAllButtons() {
+    const counts = getPotCounts();
+    GROUPS.forEach((group, gi) => {
+      group.teams.forEach((team, ti) => {
+        const btn = document.getElementById(`btn-${gi}-${ti}`);
+        const isSelected = selections[gi] === ti;
+        const groupTaken = selections[gi] !== null && !isSelected;
+        const potFull = counts[team.pot] >= POT_LIMIT && !isSelected;
+        btn.disabled = groupTaken || potFull;
+        btn.classList.toggle('selected', isSelected);
+        btn.querySelector('.check').style.display = isSelected ? 'flex' : 'none';
+      });
+    });
+    renderPotTrackers();
+    renderPickCount();
+    updateSubmitButton();
+  }
+
+  function buildGroups() {
+    const grid = document.getElementById('groups-grid');
+    GROUPS.forEach((group, gi) => {
+      const card = document.createElement('div');
+      card.className = 'group-card';
+      card.innerHTML = `<h2>${group.name}</h2><div class="team-list" id="tl-${gi}"></div>`;
+      grid.appendChild(card);
+
+      const list = card.querySelector(`#tl-${gi}`);
+      group.teams.forEach((team, ti) => {
+        const btn = document.createElement('button');
+        btn.id = `btn-${gi}-${ti}`;
+        btn.className = 'team-btn';
+        btn.innerHTML = `
+          <span class="pot-badge pot-${team.pot}">P${team.pot}</span>
+          <span>${team.name}</span>
+          <span class="check">✓</span>
+        `;
+        btn.addEventListener('click', () => {
+          if (selections[gi] === ti) {
+            // Deselect
+            selections[gi] = null;
+          } else {
+            selections[gi] = ti;
+          }
+          updateAllButtons();
+        });
+        list.appendChild(btn);
+      });
+    });
+  }
+
+  // ─── FORM SUBMISSION ─────────────────────────────────────────────────────────
+  document.getElementById('submit-btn').addEventListener('click', async () => {
+    const name = document.getElementById('input-name').value.trim();
+    const email = document.getElementById('input-email').value.trim();
+    const msg = document.getElementById('validation-msg');
+
+    if (!name) {
+      msg.textContent = 'Please enter your name.';
+      return;
+    }
+
+    if (!email) {
+      msg.textContent = 'Please enter your email.';
+      return;
+    }
+
+    // Build picks string
+    const picks = [];
+    selections.forEach((teamIdx, groupIdx) => {
+      if (teamIdx !== null) {
+        picks.push(`${GROUPS[groupIdx].name}: ${GROUPS[groupIdx].teams[teamIdx].name}`);
+      }
+    });
+
+    // Submit to Netlify Forms
+    const formData = new FormData();
+    formData.append('form-name', 'worldcup-picks');
+    formData.append('name', name);
+    formData.append('email', email);
+    formData.append('picks', picks.join(' | '));
+    formData.append('bot-field', '');
+
+    try {
+      const res = await fetch('/', { method: 'POST', body: formData });
+      if (res.ok) {
+        document.getElementById('submit-btn').style.display = 'none';
+        document.getElementById('success-msg').style.display = 'block';
+        document.getElementById('input-name').disabled = true;
+        document.getElementById('input-email').disabled = true;
+      } else {
+        msg.textContent = 'Submission failed. Please try again.';
+      }
+    } catch (e) {
+      msg.textContent = 'Network error. Please try again.';
+    }
+  });
+
+  // ─── INIT ────────────────────────────────────────────────────────────────────
+  buildGroups();
+  renderPotTrackers();
+  renderPickCount();
+  updateSubmitButton();
+</script>
+</body>
+</html>
